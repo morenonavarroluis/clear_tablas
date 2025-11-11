@@ -1,0 +1,29 @@
+<!-- Modal -->
+<div class="modal fade" id="Editar_switch{{ switch.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Registrar switch</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{% url 'editar_switch' switch.id %}"  method="POST">
+           {% csrf_token %}
+           <div class="mb-3">
+              <label for="nombre" class="form-label">Usuario</label>
+              <input type="text" class="form-control"  name="username" required>
+           </div>
+           <div class="mb-3">
+              <label for="ip" class="form-label">password</label>
+              <input type="password" class="form-control"  name="password" required>
+           </div>
+            
+        </div>
+        <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn btn-primary">Registrar</button>
+        </div>
+    </form>
+    </div>
+  </div>
+</div>

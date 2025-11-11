@@ -1,0 +1,26 @@
+{% extends 'layouts/login.html' %}
+
+{% block content %}
+
+<div class="container mt-5 border p-4 rounded-3 shadow-lg">
+    <div class="row">
+        <div class="col text-center">
+            <h1>Bienvenido a la página de inicio</h1>
+            <p class="lead">Esta es la página principal de la aplicación de Limpieza de tablas.</p>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col text-center  mx-auto" style="max-width: 400px;">
+            <form action="iniciar" method="POST">
+                {% csrf_token %}
+                <input type="text" name="username" class="form-control mb-2 py-1 text-center" placeholder="Usuario">
+                
+                <input type="password" name="password" class="form-control mb-2 py-1 text-center" placeholder="Contraseña">
+
+                <button type="submit" class="btn btn-primary">acceder</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
