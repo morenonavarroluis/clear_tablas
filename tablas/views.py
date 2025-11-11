@@ -21,8 +21,7 @@ def iniciar(request):
             encrypted_login_pass = encrypt_password(password)
             request.session['login_username'] = username
             request.session['login_password_enc'] = encrypted_login_pass
-            print(f"Usuario {username} ha iniciado sesión.")
-            print(f"Contraseña encriptada almacenada en sesión: {encrypted_login_pass}")
+       
             return redirect('home')
         else:
             messages.error(request, 'Credenciales inválidas. Por favor, inténtalo de nuevo.')
@@ -40,7 +39,7 @@ def home(request):
         status__in=['SUCCESS', 'FAILED'],
         message_shown=False
     ).select_related('switch') 
-    print(logs_finalizados)
+   
     logs_a_marcar = []
     
     for log in logs_finalizados:
