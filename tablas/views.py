@@ -34,8 +34,31 @@ def iniciar(request):
 @login_required
 def home(request):
     Switches = Switch.objects.all()
+
+    logs_finalizados = CleanLog.objects.filter(
+        user=request.user, 
+        status__in=['SUCCESS', 'FAILED'],
+        message_shown=False
+    ).select_related('switch') 
+    print(logs_finalizados)
+    logs_a_marcar = []
+    
+    for log in logs_finalizados:
+        if log.status == 'SUCCESS':
+            messages.success(request, f"✅ Tarea Finalizada en {log.switch.nombre}: Limpieza exitosa.")
+        elif log.status == 'FAILED':
+           
+            error_msg = (log.log_output or "Verifique el log para más detalles.").split('\n')[-2] 
+            messages.error(request, f"❌ Tarea Fallida en {log.switch.nombre}: {error_msg}")
+        logs_a_marcar.append(log.pk)
+    if logs_a_marcar:
+        CleanLog.objects.filter(pk__in=logs_a_marcar).update(message_shown=True)
+    
+    
     contexto = {
         'switches': Switches
+        # Opcional: pasar todos los logs para una tabla de historial en home.html
+        # 'historial_logs': CleanLog.objects.filter(user=request.user).order_by('-timestamp')[:10]
     }
     return render(request, 'pages/home.html', contexto)
 
@@ -104,6 +127,7 @@ def clear_switch_security(request, switch_id):
     # 4. Crear el log
     new_log = CleanLog.objects.create(
         switch=switch,
+        user=request.user,
         status='RUNNING'
     )
     
