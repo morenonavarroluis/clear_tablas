@@ -37,7 +37,7 @@
                                     <td>{{ request.user.username }}</td>
                                     <td>
                                         <a href="#" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#Editar_switch{{ switch.id }}">Editar</a>
-                                        <a href="#" class="btn btn-sm btn-danger">Eliminar</a>
+                                        <a href="{% url 'delete_switch' switch_id=switch.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
                                         {% url 'clear_switch_security' switch_id=switch.pk as ruta %}
                                     <a href="#" class="btn btn-primary btn-sm"
                                        onclick="confirmarEliminar(event, '{{ruta}}')" ><i class="fa-solid fa-trash"></i>

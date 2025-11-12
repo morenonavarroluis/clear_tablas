@@ -61,7 +61,6 @@ def home(request):
         # 'historial_logs': CleanLog.objects.filter(user=request.user).order_by('-timestamp')[:10]
     }
     return render(request, 'pages/home.html', contexto)
-
 load_key() 
 
 @login_required
@@ -100,7 +99,6 @@ def verificar_logs_finalizados(request):
 
     # 4. Devolver los mensajes como JSON
     return JsonResponse({'mensajes': mensajes})
-
 
 def register_switches(request):
     if not request.user.is_authenticated:
@@ -218,6 +216,20 @@ def editar_switch(request, switch_id):
             messages.error(request, f'Error al actualizar el switch. Detalles: {e}')
             return redirect('home')
     else:
+        return redirect('home')
+
+def delete_switch(request, switch_id):
+    if not request.user.is_authenticated:
+        return redirect('login') 
+        
+    try:
+        switch = Switch.objects.get(pk=switch_id)
+        switch.delete()
+        messages.success(request, f'El Switch ha sido eliminado exitosamente.')
+        return redirect('home')
+
+    except Switch.DoesNotExist:
+        messages.error(request, "Switch no encontrado.")
         return redirect('home')
 
 def logout_view(request):
