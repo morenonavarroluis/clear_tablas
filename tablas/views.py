@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from .utils import decrypt_password, _clear_port_security, load_key, encrypt_password
 import threading
 from .models import Switch, CleanLog
+from django.http import JsonResponse
 # Create your views here.
 def inicio(request):
     return render(request, 'pages/inicio.html')
@@ -63,6 +64,44 @@ def home(request):
 
 load_key() 
 
+@login_required
+def verificar_logs_finalizados(request):
+    logs_finalizados = CleanLog.objects.filter(
+        user=request.user, 
+        status__in=['SUCCESS', 'FAILED'],
+        message_shown=False
+    ).select_related('switch')
+
+    logs_a_marcar_pks = []
+    mensajes = []
+
+    for log in logs_finalizados:
+        mensaje_base = f"Tarea en {log.switch.nombre}"
+        
+        if log.status == 'SUCCESS':
+            mensajes.append({
+                'tipo': 'success',
+                'icono': '✅',
+                'texto': f"{mensaje_base}: Limpieza exitosa."
+            })
+        elif log.status == 'FAILED':
+            error_msg = (log.log_output or "Verifique el log para más detalles.").split('\n')[-2].strip()
+            mensajes.append({
+                'tipo': 'error',
+                'icono': '❌',
+                'texto': f"{mensaje_base} fallida: {error_msg}"
+            })
+            
+        logs_a_marcar_pks.append(log.pk)
+
+    if logs_a_marcar_pks:
+        # 3. Marcar los logs como mostrados
+        CleanLog.objects.filter(pk__in=logs_a_marcar_pks).update(message_shown=True)
+
+    # 4. Devolver los mensajes como JSON
+    return JsonResponse({'mensajes': mensajes})
+
+
 def register_switches(request):
     if not request.user.is_authenticated:
         return redirect('login') 
@@ -98,7 +137,6 @@ def register_switches(request):
         # con los campos 'ssh_username' y 'ssh_password'.
         return render(request, 'pages/home.html')
     
-
 @login_required
 def clear_switch_security(request, switch_id):
     # 1. Recuperar el Switch
@@ -141,10 +179,9 @@ def clear_switch_security(request, switch_id):
     )
     thread.start()
     
-    messages.info(request, f"Iniciando limpieza de {switch.nombre} ({switch.ip_address}) en segundo plano. El estado se actualizará en la lista.")
+    messages.info(request, f"Iniciando limpieza de {switch.nombre} ({switch.ip_address}) en segundo plano.")
     
     return redirect('home')
-
 
 def editar_switch(request, switch_id):
     if not request.user.is_authenticated:

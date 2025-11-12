@@ -56,4 +56,75 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Función para llamar a SweetAlert2
+    function showSweetAlert(tipo, texto) {
+        // El 'tipo' que recibimos del JSON coincide con el icono de SweetAlert (success, error, warning, etc.)
+        Swal.fire({
+            title: tipo.toUpperCase(), // Puedes usar el tipo como título
+            text: texto,
+            icon: tipo,
+            toast: true, // Si quieres que sean notificaciones pequeñas que desaparecen
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 8000 // Desaparece después de 8 segundos
+        });
+    }
+
+    // Función para realizar la llamada AJAX periódicamente
+    function checkLogs() {
+        // Asegúrate de usar la URL correcta para tu vista
+        const url = "{% url 'verificar_logs_finalizados' %}"; 
+        
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Respuesta de red no fue ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.mensajes && data.mensajes.length > 0) {
+                // Iterar sobre los mensajes recibidos
+                data.mensajes.forEach(msg => {
+                    // Llamar a la función SweetAlert con los datos del JSON
+                    showSweetAlert(msg.tipo, `${msg.icono} ${msg.texto}`);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error al verificar logs:', error);
+        });
+    }
+
+    // Ejecutar la función cada 5 segundos (5000 milisegundos)
+    // Esto es lo que permite que se ejecute sin refrescar la página
+    setInterval(checkLogs, 5000); 
+    
+    // Ejecutar una vez al cargar la página
+    checkLogs();
+</script>
+
+{% if messages %}
+    {% for message in messages %}
+    <script>
+        // Esta parte SÓLO funciona en la carga inicial
+        Swal.fire({
+            title: '{{ message.tags|title }}',
+            text: '{{ message }}',
+            icon: '{{ message.tags }}',
+            toast: true, 
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 8000
+        });
+    </script>
+    {% endfor %}
+{% endif %}
 {% endblock %}
